@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -39,4 +40,28 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("DB接続成功")
+
+	rows, err := db.Query("SELECT id, title, description, created_at, updated_at FROM todos")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+		var title string
+		var description string
+		var created_at time.Time
+		var updated_at time.Time
+
+		err := rows.Scan(&id, &title, &description, &created_at, &updated_at)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(id, title, description, created_at, updated_at)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
