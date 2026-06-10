@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"go-todo/repositories"
+	"go-todo/services"
 	"log"
 	"os"
 
@@ -42,7 +43,8 @@ func main() {
 	fmt.Println("DB接続成功")
 
 	repo := repositories.NewTodoRepository(db)
-	todos, err := repo.GetTodos()
+	service := services.NewTodoService(repo)
+	todos, err := service.GetTodos()
 	if err != nil {
 		log.Fatal(err)
 	}
