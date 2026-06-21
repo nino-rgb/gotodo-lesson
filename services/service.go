@@ -18,3 +18,7 @@ func NewTodoService(repo *repositories.TodoRepository) *TodoService {
 func (s *TodoService) GetTodos() ([]models.Todo, error) {
 	return s.repo.GetTodos()
 }
+
+func (s *TodoService) CreateTodo(todo *models.Todo) error {
+	return s.repo.CreateTodo(todo)
+}

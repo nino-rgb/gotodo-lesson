@@ -39,3 +39,21 @@ func (t *TodoRepository) GetTodos() ([]models.Todo, error) {
 
 	return todos, nil
 }
+
+func (t *TodoRepository) CreateTodo(todo *models.Todo) error {
+	query := "INSERT INTO todos (title, description) VALUES(?, ?)"
+
+	result, err := t.db.Exec(query, todo.Title, todo.Description)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	todo.ID = int(id)
+
+	return nil
+}

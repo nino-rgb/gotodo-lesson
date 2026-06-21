@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"go-todo/handlers"
 	"go-todo/repositories"
 	"go-todo/services"
 	"log"
+	"net/http"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -44,9 +46,9 @@ func main() {
 
 	repo := repositories.NewTodoRepository(db)
 	service := services.NewTodoService(repo)
-	todos, err := service.GetTodos()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(todos)
+	handler := handlers.NewTodoHandler(service)
+
+	http.Handle("/todos", handler)
+	fmt.Println("server start: http://localhost:4000")
+	log.Fatal(http.ListenAndServe(":4000", nil))
 }
