@@ -57,3 +57,34 @@ func (t *TodoRepository) CreateTodo(todo *models.Todo) error {
 
 	return nil
 }
+
+func (t *TodoRepository) GetTodoByID(id int) (*models.Todo, error) {
+	query := `
+		SELECT
+			id,
+			title,
+			description,
+			created_at,
+			updated_at
+		FROM todos
+		WHERE id = ?
+	` //``を使うと複数行の文字列を書くことができる
+	//SQLが長くなって読みづらいため""ではなくこちらを使う
+
+	row := t.db.QueryRow(query, id)
+
+	var todo models.Todo
+
+	err := row.Scan(
+		&todo.ID,
+		&todo.Title,
+		&todo.Description,
+		&todo.CreatedAt,
+		&todo.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
+}
