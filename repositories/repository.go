@@ -88,3 +88,15 @@ func (t *TodoRepository) GetTodoByID(id int) (*models.Todo, error) {
 
 	return &todo, nil
 }
+
+func (t *TodoRepository) DeleteTodo(id int) error {
+	query := "DELETE FROM todos WHERE id = ?"
+
+	//ExecはSQL実行するけど結果の行は返さないときに使う
+	//Query()の逆
+	_, err := t.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

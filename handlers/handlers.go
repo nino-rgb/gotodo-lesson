@@ -32,6 +32,8 @@ func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.getTodos(w, r)
 	case http.MethodPost:
 		h.createTodo(w, r)
+	case http.MethodDelete:
+		h.deleteTodo(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -93,4 +95,22 @@ func (h *TodoHandler) createTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(todo)
+}
+
+func (h *TodoHandler) deleteTodo(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.DeleteTodo(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
