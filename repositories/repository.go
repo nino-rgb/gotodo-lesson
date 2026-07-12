@@ -100,3 +100,24 @@ func (t *TodoRepository) DeleteTodo(id int) error {
 	}
 	return nil
 }
+
+func (t *TodoRepository) UpdateTodo(id int, todo *models.Todo) error {
+	query := `
+	UPDATE todos
+	SET
+	title = ?,
+	description = ?
+	WHERE id =?`
+
+	_, err := t.db.Exec(
+		query,
+		todo.Title,
+		todo.Description,
+		id,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

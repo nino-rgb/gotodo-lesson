@@ -34,6 +34,8 @@ func (h *TodoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.createTodo(w, r)
 	case http.MethodDelete:
 		h.deleteTodo(w, r)
+	case http.MethodPut:
+		h.updateTodo(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -107,6 +109,31 @@ func (h *TodoHandler) deleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.service.DeleteTodo(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *TodoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	var todo models.Todo
+	err = json.NewDecoder(r.Body).Decode(&todo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.UpdateTodo(id, &todo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
