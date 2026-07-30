@@ -9,10 +9,12 @@ import (
 )
 
 type TodoHandler struct {
-	service *services.TodoService
+	service services.TodoServiceInterface
 }
 
-func NewTodoHandler(service *services.TodoService) *TodoHandler {
+func NewTodoHandler(
+	service services.TodoServiceInterface,
+) *TodoHandler {
 	return &TodoHandler{
 		service: service,
 	}
