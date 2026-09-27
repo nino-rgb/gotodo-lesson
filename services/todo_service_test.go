@@ -164,3 +164,15 @@ func TestTodoService_UpdateTodo_Error(t *testing.T) {
 		t.Errorf("expected %v, got %v", expectedErr, err)
 	}
 }
+
+func TestTodoService_DeleteTodo(t *testing.T) {
+	mockRepo := &MockTodoRepository{}
+
+	service := NewTodoService(mockRepo)
+
+	err := service.DeleteTodo(1)
+
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
