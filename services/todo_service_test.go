@@ -95,11 +95,46 @@ func TestTodoService_GetTodoByID_Error(t *testing.T) {
 
 	result, err := service.GetTodoByID(1)
 
+	//87で作成したエラーを返す
 	if err != expectedErr {
 		t.Errorf("expected %v, got %v", expectedErr, err)
 	}
 
 	if result != nil {
 		t.Errorf("expected nil todo, got %v", result)
+	}
+}
+
+func TestTodoService_CreateTodo(t *testing.T) {
+	todo := &models.Todo{
+		Title:       "todo1",
+		Description: "description1",
+	}
+
+	mockRepo := &MockTodoRepository{}
+
+	service := NewTodoService(mockRepo)
+
+	err := service.CreateTodo(todo)
+
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestTodoService_UpdateTodo(t *testing.T) {
+	todo := &models.Todo{
+		Title:       "Updated Todo",
+		Description: "Updated Description",
+	}
+
+	mockRepo := &MockTodoRepository{}
+
+	service := NewTodoService(mockRepo)
+
+	err := service.UpdateTodo(1, todo)
+
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 }
