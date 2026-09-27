@@ -27,7 +27,7 @@ func (m *MockTodoRepository) CreateTodo(todo *models.Todo) error {
 }
 
 func (m *MockTodoRepository) UpdateTodo(id int, todo *models.Todo) error {
-	return nil
+	return m.err
 }
 
 func (m *MockTodoRepository) DeleteTodo(id int) error {
@@ -40,6 +40,8 @@ func TestTodoService_GetTodos(t *testing.T) {
 		{ID: 2, Title: "Todo2", Description: "Description2"},
 	}
 
+	//MockTodoRepositoryにtodosには38のtodosを
+	//errはnilを返すように
 	mockRepo := &MockTodoRepository{
 		todos: todos,
 		err:   nil,
@@ -86,6 +88,8 @@ func TestTodoService_GetTodoByID(t *testing.T) {
 func TestTodoService_GetTodoByID_Error(t *testing.T) {
 	expectedErr := errors.New("repository error")
 
+	//MockTodoRepositoryにtodoはnilを
+	//err は89で作成したexpectedErrを返す
 	mockRepo := &MockTodoRepository{
 		todo: nil,
 		err:  expectedErr,
@@ -111,6 +115,7 @@ func TestTodoService_CreateTodo(t *testing.T) {
 		Description: "description1",
 	}
 
+	//MockTodoRepositoryには何も返さない 25でのreturn nilが返る(エラーなし作成成功!)
 	mockRepo := &MockTodoRepository{}
 
 	service := NewTodoService(mockRepo)
@@ -136,5 +141,26 @@ func TestTodoService_UpdateTodo(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func TestTodoService_UpdateTodo_Error(t *testing.T) {
+	expectedErr := errors.New("repository error")
+
+	todo := &models.Todo{
+		Title:       "Updated Todo",
+		Description: "Updated Description",
+	}
+
+	mockRepo := &MockTodoRepository{
+		err: expectedErr,
+	}
+
+	service := NewTodoService(mockRepo)
+
+	err := service.UpdateTodo(1, todo)
+
+	if err != expectedErr {
+		t.Errorf("expected %v, got %v", expectedErr, err)
 	}
 }
