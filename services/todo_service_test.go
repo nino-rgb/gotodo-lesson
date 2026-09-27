@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"go-todo/models"
 	"testing"
 )
@@ -79,5 +80,26 @@ func TestTodoService_GetTodoByID(t *testing.T) {
 
 	if result.ID != 1 {
 		t.Errorf("expected todo ID 1, got %d", result.ID)
+	}
+}
+
+func TestTodoService_GetTodoByID_Error(t *testing.T) {
+	expectedErr := errors.New("repository error")
+
+	mockRepo := &MockTodoRepository{
+		todo: nil,
+		err:  expectedErr,
+	}
+
+	service := NewTodoService(mockRepo)
+
+	result, err := service.GetTodoByID(1)
+
+	if err != expectedErr {
+		t.Errorf("expected %v, got %v", expectedErr, err)
+	}
+
+	if result != nil {
+		t.Errorf("expected nil todo, got %v", result)
 	}
 }
