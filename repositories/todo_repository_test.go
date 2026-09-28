@@ -64,3 +64,30 @@ func TestTodoRepository_CreateTodo(t *testing.T) {
 		}
 	}()
 }
+
+func TestTodoRepository_CreateTodo_Error(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	//nodetsの時とは違いここでdb接続を切ってエラーを発生させる
+	err = db.Close()
+	if err != nil {
+		t.Fatalf("failed to close database: %v", err)
+	}
+
+	todo := &models.Todo{
+		Title:       "Repo Test Todo",
+		Description: "Repo Test Todo",
+	}
+
+	//db接続切ってるためdb.Exec()が失敗する
+	err = repo.CreateTodo(todo)
+	//エラーならテスト成功!
+	if err == nil {
+		t.Fatalf("expect error, got nil")
+	}
+}
