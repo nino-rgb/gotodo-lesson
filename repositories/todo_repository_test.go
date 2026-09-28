@@ -103,7 +103,7 @@ func TestTodoRepository_CreateTodo_Error(t *testing.T) {
 	}
 }
 
-func TestTodoRepository_GetTods(t *testing.T) {
+func TestTodoRepository_GetTodos(t *testing.T) {
 	db, err := database.CreateDBConnection()
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
@@ -157,5 +157,25 @@ func TestTodoRepository_GetTods(t *testing.T) {
 	//ダミー2が取得できてなかったらテスト失敗
 	if !titles["ダミー2"] {
 		t.Errorf("expected ダミー2 to be included")
+	}
+}
+
+func TestTodoRepository_GetTodos_Error(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	err = db.Close()
+	if err != nil {
+		t.Fatalf("failed to close database: %v", err)
+	}
+
+	_, err = repo.GetTodos()
+
+	if err == nil {
+		t.Fatalf("expect error, got nil")
 	}
 }
