@@ -179,3 +179,45 @@ func TestTodoRepository_GetTodos_Error(t *testing.T) {
 		t.Fatalf("expect error, got nil")
 	}
 }
+
+func TestTodoRepository_GetTodoByID(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	defer db.Close()
+	cleanTodos(t, db)
+
+	result, err := db.Exec(
+		"INSERT INTO todos (title, description) VALUES (?, ?)",
+		"ダミー1",
+		"詳細1",
+	)
+
+	if err != nil {
+		t.Fatalf("failed to insert todo: %v", err)
+	}
+
+	//ここで最後に生成されたidを取得して､resultに渡してる
+	id, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("failed to get inserted id: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	todo, err := repo.GetTodoByID(int(id))
+
+	if todo.ID != int(id) {
+		t.Errorf("expected id %d, got %d", id, todo.ID)
+	}
+
+	if todo.Title != "ダミー1" {
+		t.Errorf("expected title ダミー1､ got %s", todo.Title)
+	}
+
+	if todo.Description != "詳細1" {
+		t.Errorf("expected description 詳細1, got %s", todo.Description)
+	}
+}
