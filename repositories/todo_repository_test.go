@@ -91,3 +91,61 @@ func TestTodoRepository_CreateTodo_Error(t *testing.T) {
 		t.Fatalf("expect error, got nil")
 	}
 }
+
+func TestTodoRepository_GetTods(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec("DELETE FROM todos")
+	if err != nil {
+		t.Fatalf("failed to clean todos: %v", err)
+	}
+
+	//createの実装に依存したテストにならないためにrepo.CreateTodo(...)
+	//ではなくdb.Exxec()を使ってインサートする
+	_, err = db.Exec(
+		"INSERT INTO todos (title, description) VALUES (?, ?)",
+		"ダミー1",
+		"詳細1",
+	)
+	if err != nil {
+		t.Fatalf("failed to insert todo: %v", err)
+	}
+
+	_, err = db.Exec(
+		"INSERT INTO todos (title, description) VALUES (?, ?)",
+		"ダミー2",
+		"詳細2",
+	)
+	if err != nil {
+		t.Fatalf("failed to insert todo: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	todos, err := repo.GetTodos()
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	//todoがあるかの確認用マップ
+	titles := map[string]bool{}
+
+	//SQLにORDER BYつけるんだるかったから作成順を気にしない仕様
+	for _, todo := range todos {
+		titles[todo.Title] = true
+	}
+
+	//ダミー1が取得できてなかったらテスト失敗
+	if !titles["ダミー1"] {
+		t.Errorf("expected ダミー1 to be included")
+	}
+	//ダミー2が取得できてなかったらテスト失敗
+	if !titles["ダミー2"] {
+		t.Errorf("expected ダミー2 to be included")
+	}
+}
