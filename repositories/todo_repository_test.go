@@ -1,10 +1,21 @@
 package repositories
 
 import (
+	"database/sql"
 	"go-todo/models"
 	"go-todo/tests/utils/database"
 	"testing"
 )
+
+// t.Helper() テスト本体ではなくテスト補助のためのヘルパー関数とGoに伝えるもの
+func cleanTodos(t *testing.T, db *sql.DB) {
+	t.Helper()
+
+	_, err := db.Exec("DELETE FROM todos")
+	if err != nil {
+		t.Fatalf("failed to clean todos: %v", err)
+	}
+}
 
 func TestTodoRepository_CreateTodo(t *testing.T) {
 	db, err := database.CreateDBConnection()
@@ -99,10 +110,9 @@ func TestTodoRepository_GetTods(t *testing.T) {
 	}
 	defer db.Close()
 
-	_, err = db.Exec("DELETE FROM todos")
-	if err != nil {
-		t.Fatalf("failed to clean todos: %v", err)
-	}
+	//一番上にtodosを空にするのを作成しているのでここで呼ぶだけでいい
+	//nodetsのBeforEachを擬似的に再現している
+	cleanTodos(t, db)
 
 	//createの実装に依存したテストにならないためにrepo.CreateTodo(...)
 	//ではなくdb.Exxec()を使ってインサートする
