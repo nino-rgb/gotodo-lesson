@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
 	"go-todo/models"
 	"go-todo/tests/utils/database"
 	"testing"
@@ -219,5 +220,23 @@ func TestTodoRepository_GetTodoByID(t *testing.T) {
 
 	if todo.Description != "詳細1" {
 		t.Errorf("expected description 詳細1, got %s", todo.Description)
+	}
+}
+
+func TestTodoRepository_GetByID_NotFound(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+	defer db.Close()
+
+	cleanTodos(t, db)
+
+	repo := NewTodoRepository(db)
+
+	_, err = repo.GetTodoByID(9999)
+
+	if !errors.Is(err, models.ErrNotFound) {
+		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

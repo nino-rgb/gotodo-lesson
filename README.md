@@ -39,3 +39,5 @@ var ErrNotFound = errors.New("todo not found")
 - errors.New()はGo標準ライブラリが用意してるエラー型から値が作られる｡今回はerrors.New()にtodo not foundを渡し､todo not foundというメッセを持つエラー値を作成し､ErrNotFound(変数)に代入している?
 - 最後にerrors.Is(err, ErrNotFound)で返却されたエラーはErrNotFoundとして使えるのかチェックする
 - Goでもエラー型のストラクトなら作れんじゃねとは思う←作れるけど今回のID取得のエラーに特筆して情報をもたせる必要がないため､型まで作る必要なしと判断
+- errors.New()などで変数を定義するエラーをセンチネルエラーという頭にErrという文字をつけるのがしきたり
+- NotFoundDataErrorのような名前にしないのは型と勘違いしないため

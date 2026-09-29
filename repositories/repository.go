@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
 	"go-todo/models"
 )
 
@@ -82,10 +83,16 @@ func (t *TodoRepository) GetTodoByID(id int) (*models.Todo, error) {
 		&todo.CreatedAt,
 		&todo.UpdatedAt,
 	)
+
+	//sql.ErrNoRowsだけErrNotFound返す
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, models.ErrNotFound
+	}
+
+	//他のエラーは今まで通り普通にエラー返す
 	if err != nil {
 		return nil, err
 	}
-
 	return &todo, nil
 }
 
