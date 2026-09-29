@@ -361,3 +361,79 @@ func TestTodoRepository_UpdateTodo_Error(t *testing.T) {
 		t.Fatalf("expect error, got nil")
 	}
 }
+
+func TestTodoRepository_DeleteTodo(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	defer db.Close()
+	cleanTodos(t, db)
+
+	result, err := db.Exec(
+		"INSERT INTO todos (title, description) VALUES (?, ?)",
+		"ダミー1",
+		"詳細1",
+	)
+
+	if err != nil {
+		t.Fatalf("failed to insert todo: %v", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("failed to get inserted id: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	err = repo.DeleteTodo(int(id))
+	if err != nil {
+		t.Fatalf("failed to delete todo: %v", err)
+	}
+
+	_, err = repo.GetTodoByID(int(id))
+
+	if !errors.Is(err, models.ErrNotFound) {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestTodoRepository_DeleteTodo_NotFound(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+	defer db.Close()
+
+	cleanTodos(t, db)
+
+	repo := NewTodoRepository(db)
+
+	err = repo.DeleteTodo(3333)
+
+	if !errors.Is(err, models.ErrNotFound) {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestTodoRepository_DeleteTodo_Error(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	err = db.Close()
+	if err != nil {
+		t.Fatalf("failed to close database: %v", err)
+	}
+
+	err = repo.DeleteTodo(1)
+
+	if err == nil {
+		t.Fatalf("expect error, got nil")
+	}
+}

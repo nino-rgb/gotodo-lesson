@@ -101,9 +101,18 @@ func (t *TodoRepository) DeleteTodo(id int) error {
 
 	//ExecはSQL実行するけど結果の行は返さないときに使う
 	//Query()の逆
-	_, err := t.db.Exec(query, id)
+	result, err := t.db.Exec(query, id)
 	if err != nil {
 		return err
+	}
+
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affectedRows == 0 {
+		return models.ErrNotFound
 	}
 	return nil
 }
