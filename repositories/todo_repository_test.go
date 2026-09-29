@@ -240,3 +240,76 @@ func TestTodoRepository_GetByID_NotFound(t *testing.T) {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
+
+func TestTodoRepository_GetByID_Error(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	err = db.Close()
+	if err != nil {
+		t.Fatalf("failed to close database: %v", err)
+	}
+
+	_, err = repo.GetTodoByID(1)
+
+	if err == nil {
+		t.Fatalf("expect error, got nil")
+	}
+}
+
+func TestTodoRepository_UpdataTodo(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	defer db.Close()
+	cleanTodos(t, db)
+
+	result, err := db.Exec(
+		"INSERT INTO todos (title, description) VALUES (?, ?)",
+		"ダミー1",
+		"詳細1",
+	)
+
+	if err != nil {
+		t.Fatalf("failed to insert todo: %v", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("failed to get inserted id: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	updateTodo := &models.Todo{
+		Title:       "更新後タイトル",
+		Description: "更新後詳細",
+	}
+
+	err = repo.UpdateTodo(int(id), updateTodo)
+	if err != nil {
+		t.Fatalf("failed to update todo: %v", err)
+	}
+	actual, err := repo.GetTodoByID(int(id))
+	if err != nil {
+		t.Fatalf("failed to get updata todo: %v", err)
+	}
+
+	if actual.Title != "更新後タイトル" {
+		t.Errorf("expected title 更新後タイトル, got %s", actual.Title)
+	}
+
+	if actual.Title != "更新後タイトル" {
+		t.Errorf("expected title 更新後タイトル, got %s", actual.Title)
+	}
+
+	if actual.Description != "更新後詳細" {
+		t.Errorf("expected description 更新後詳細, got %s", actual.Description)
+	}
+}
