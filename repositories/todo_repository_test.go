@@ -336,3 +336,28 @@ func TestTodoRepository_UpdateTodo_NotFound(t *testing.T) {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
+
+func TestTodoRepository_UpdateTodo_Error(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+
+	repo := NewTodoRepository(db)
+
+	err = db.Close()
+	if err != nil {
+		t.Fatalf("failed to close database: %v", err)
+	}
+
+	updateTodo := &models.Todo{
+		Title:       "更新後タイトル",
+		Description: "更新後詳細",
+	}
+
+	err = repo.UpdateTodo(1, updateTodo)
+
+	if err == nil {
+		t.Fatalf("expect error, got nil")
+	}
+}
