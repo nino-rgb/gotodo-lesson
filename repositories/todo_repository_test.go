@@ -261,7 +261,7 @@ func TestTodoRepository_GetByID_Error(t *testing.T) {
 	}
 }
 
-func TestTodoRepository_UpdataTodo(t *testing.T) {
+func TestTodoRepository_UpdateTodo(t *testing.T) {
 	db, err := database.CreateDBConnection()
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
@@ -311,5 +311,28 @@ func TestTodoRepository_UpdataTodo(t *testing.T) {
 
 	if actual.Description != "更新後詳細" {
 		t.Errorf("expected description 更新後詳細, got %s", actual.Description)
+	}
+}
+
+func TestTodoRepository_UpdateTodo_NotFound(t *testing.T) {
+	db, err := database.CreateDBConnection()
+	if err != nil {
+		t.Fatalf("failed to connect database: %v", err)
+	}
+	defer db.Close()
+
+	cleanTodos(t, db)
+
+	repo := NewTodoRepository(db)
+
+	updateTodo := &models.Todo{
+		Title:       "更新後タイトル",
+		Description: "更新後詳細",
+	}
+
+	err = repo.UpdateTodo(3333, updateTodo)
+
+	if !errors.Is(err, models.ErrNotFound) {
+		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

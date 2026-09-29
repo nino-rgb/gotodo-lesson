@@ -116,7 +116,7 @@ func (t *TodoRepository) UpdateTodo(id int, todo *models.Todo) error {
 	description = ?
 	WHERE id =?`
 
-	_, err := t.db.Exec(
+	result, err := t.db.Exec(
 		query,
 		todo.Title,
 		todo.Description,
@@ -124,6 +124,15 @@ func (t *TodoRepository) UpdateTodo(id int, todo *models.Todo) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affectedRows == 0 {
+		return models.ErrNotFound
 	}
 
 	return nil
