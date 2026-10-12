@@ -5,11 +5,13 @@ import (
 	"go-todo/models"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 type MockTodoService struct {
 	GetTodoByIDFunc func(id int) (*models.Todo, error)
+	UpdateTodoFunc  func(id int, todo *models.Todo) error
 }
 
 func (m *MockTodoService) GetTodos() ([]models.Todo, error) {
@@ -25,7 +27,7 @@ func (m *MockTodoService) CreateTodo(todo *models.Todo) error {
 }
 
 func (m *MockTodoService) UpdateTodo(id int, todo *models.Todo) error {
-	panic("not implemented")
+	return m.UpdateTodoFunc(id, todo)
 }
 
 func (m *MockTodoService) DeleteTodo(id int) error {
@@ -77,5 +79,30 @@ func TestTodoHandler_GetTodoByID(t *testing.T) {
 			expectedTodo.Description,
 			actualTodo.Description,
 		)
+	}
+}
+
+func TestTodoHandler_UpdateTodo_NotFound(t *testing.T) {
+
+	mockService := &MockTodoService{
+		UpdateTodoFunc: func(id int, todo *models.Todo) error {
+			return models.ErrNotFound
+		},
+	}
+
+	handler := NewTodoHandler(mockService)
+
+	body := `{
+    "title": "更新タイトル",
+		"description": "更新詳細"
+		}`
+	req := httptest.NewRequest(http.MethodPut, "/todos?id=999", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	//strings.NewReader(body) 文字列を httpリクエストのbodyとして読み取れる形に変更するもの
+	//httptest.NewRequest()の第三引数はio.Readerを返さなければならないために使っている
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected status %d, got %d", http.StatusNotFound, rec.Code)
 	}
 }

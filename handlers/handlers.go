@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"go-todo/models"
 	"go-todo/services"
 	"net/http"
@@ -136,6 +137,15 @@ func (h *TodoHandler) updateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.service.UpdateTodo(id, &todo)
+
+	//models.ErrNotFoundを 404エラーに変換する
+	//リポジトリではmodels.ErrNotFoundを返す
+	//サービス層ではそのエラーをハンドラーに返すのがここの各層での違い
+	if errors.Is(err, models.ErrNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
