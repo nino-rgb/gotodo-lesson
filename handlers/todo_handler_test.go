@@ -12,6 +12,7 @@ import (
 type MockTodoService struct {
 	GetTodoByIDFunc func(id int) (*models.Todo, error)
 	UpdateTodoFunc  func(id int, todo *models.Todo) error
+	CreateTodoFunc  func(todo *models.Todo) error
 }
 
 func (m *MockTodoService) GetTodos() ([]models.Todo, error) {
@@ -23,7 +24,7 @@ func (m *MockTodoService) GetTodoByID(id int) (*models.Todo, error) {
 }
 
 func (m *MockTodoService) CreateTodo(todo *models.Todo) error {
-	panic("not implemented")
+	return m.CreateTodoFunc(todo)
 }
 
 func (m *MockTodoService) UpdateTodo(id int, todo *models.Todo) error {
@@ -104,5 +105,28 @@ func TestTodoHandler_UpdateTodo_NotFound(t *testing.T) {
 
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+	}
+}
+
+func TestHandler_CreateTodo_InvalidJSON(t *testing.T) {
+
+	mockService := &MockTodoService{
+		CreateTodoFunc: func(todo *models.Todo) error {
+			t.Fatalf("CreateTodo Should not be called")
+			return nil
+		},
+	}
+
+	handler := NewTodoHandler(mockService)
+
+	body := `{"title"`
+
+	req := httptest.NewRequest(http.MethodPost, "/todos", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, rec.Code)
 	}
 }
