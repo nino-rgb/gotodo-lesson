@@ -9,10 +9,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func CreateDBConnection() (*sql.DB, error) {
+func CreateDBConnection(envPath string) (*sql.DB, error) {
 	//godotenv.Load()は実行時のカレントディレクトリの.envを探すため
 	//repositores/.envをリポジトリから呼んだときに探す為リポジトリからみたパスを指定してあげる
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(envPath) //引数をこれにすることにより呼び出し元に応じてパス指定ができる
 	if err != nil {
 		return nil, err
 	}
