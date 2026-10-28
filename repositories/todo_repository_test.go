@@ -19,7 +19,7 @@ func cleanTodos(t *testing.T, db *sql.DB) {
 }
 
 func TestTodoRepository_CreateTodo(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestTodoRepository_CreateTodo(t *testing.T) {
 }
 
 func TestTodoRepository_CreateTodo_Error(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -105,7 +105,7 @@ func TestTodoRepository_CreateTodo_Error(t *testing.T) {
 }
 
 func TestTodoRepository_GetTodos(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestTodoRepository_GetTodos(t *testing.T) {
 }
 
 func TestTodoRepository_GetTodos_Error(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -182,7 +182,7 @@ func TestTodoRepository_GetTodos_Error(t *testing.T) {
 }
 
 func TestTodoRepository_GetTodoByID(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -224,7 +224,7 @@ func TestTodoRepository_GetTodoByID(t *testing.T) {
 }
 
 func TestTodoRepository_GetByID_NotFound(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -242,7 +242,7 @@ func TestTodoRepository_GetByID_NotFound(t *testing.T) {
 }
 
 func TestTodoRepository_GetByID_Error(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -262,7 +262,7 @@ func TestTodoRepository_GetByID_Error(t *testing.T) {
 }
 
 func TestTodoRepository_UpdateTodo(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -315,7 +315,7 @@ func TestTodoRepository_UpdateTodo(t *testing.T) {
 }
 
 func TestTodoRepository_UpdateTodo_NotFound(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -338,7 +338,7 @@ func TestTodoRepository_UpdateTodo_NotFound(t *testing.T) {
 }
 
 func TestTodoRepository_UpdateTodo_Error(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -363,7 +363,7 @@ func TestTodoRepository_UpdateTodo_Error(t *testing.T) {
 }
 
 func TestTodoRepository_DeleteTodo(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -401,7 +401,7 @@ func TestTodoRepository_DeleteTodo(t *testing.T) {
 }
 
 func TestTodoRepository_DeleteTodo_NotFound(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}
@@ -419,7 +419,7 @@ func TestTodoRepository_DeleteTodo_NotFound(t *testing.T) {
 }
 
 func TestTodoRepository_DeleteTodo_Error(t *testing.T) {
-	db, err := database.CreateDBConnection("../.env")
+	db, err := database.CreateDBConnection("../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect database: %v", err)
 	}

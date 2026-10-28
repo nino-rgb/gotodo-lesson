@@ -45,3 +45,5 @@ var ErrNotFound = errors.New("todo not found")
 modelsにおくなら､todoError.goなどそれぞれのエラー毎に分けるべき
 packageで分けるでも力技だが変数名で分けちゃうのも有り(ErrTodoNotFoundなど変数名にtodoやuserを入れちゃう)
 規模感次第で今回はこのままでも許さなくもない
+- テスト用DBと本番用DBを分けてみる
+- DBを分けてテーブル名は同じものを作成したら､DB接続の際に接続するDBさえ分ければコード内のSQLを変えなくて済む

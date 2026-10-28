@@ -18,7 +18,7 @@ func TestAPI_GetTodos(t *testing.T) {
 		Description: "GET APIの統合テスト",
 	}
 
-	db, err := database.CreateDBConnection("../../.env")
+	db, err := database.CreateDBConnection("../../.env.test")
 	if err != nil {
 		t.Fatalf("failed to connect to DB: %v", err)
 	}
