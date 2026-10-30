@@ -2,6 +2,7 @@ package integration
 
 import (
 	"encoding/json"
+	"fmt"
 	"go-todo/handlers"
 	"go-todo/models"
 	"go-todo/repositories"
@@ -79,5 +80,61 @@ func TestAPI_GetTodos(t *testing.T) {
 
 	if !found {
 		t.Errorf("Todo with ID %d was not found", todo.ID)
+	}
+}
+
+func TestAPI_GetTodosByID(t *testing.T) {
+	todo := &models.Todo{
+		Title:       "APIテスト用Todo",
+		Description: "GET APIの統合テスト",
+	}
+
+	db, err := database.CreateDBConnection("../../.env.test")
+	if err != nil {
+		t.Fatalf("failed to connect to DB: %v", err)
+	}
+
+	t.Cleanup(func() {
+
+		_, err := db.Exec("DELETE FROM todos WHERE id = ?", todo.ID)
+		if err != nil {
+			t.Errorf("failed to clean up test todo: %v", err)
+		}
+		db.Close()
+	})
+	repo := repositories.NewTodoRepository(db)
+	service := services.NewTodoService(repo)
+	handler := handlers.NewTodoHandler(service)
+
+	err = repo.CreateTodo(todo)
+	if err != nil {
+		t.Fatalf("failed to prepare test todo: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/todos?id=%d", todo.ID), nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+
+	var actualTodo models.Todo
+	err = json.NewDecoder(rec.Body).Decode(&actualTodo)
+	if err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if actualTodo.ID != todo.ID {
+		t.Errorf("expected ID %d, got %d", todo.ID, actualTodo.ID)
+	}
+
+	if actualTodo.Title != todo.Title {
+		t.Errorf("expected Title %s, got %s", todo.Title, actualTodo.Title)
+	}
+
+	if actualTodo.Description != todo.Description {
+		t.Errorf("expected Description %s, got %s", todo.Description, actualTodo.Description)
 	}
 }
