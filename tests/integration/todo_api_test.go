@@ -138,3 +138,23 @@ func TestAPI_GetTodosByID(t *testing.T) {
 		t.Errorf("expected Description %s, got %s", todo.Description, actualTodo.Description)
 	}
 }
+
+func TestAPI_GetTodoByID_NotFound(t *testing.T) {
+	db, err := database.CreateDBConnection("../../.env.test")
+	if err != nil {
+		t.Fatalf("failed to connect to DB: %v", err)
+	}
+	defer db.Close()
+	repo := repositories.NewTodoRepository(db)
+	service := services.NewTodoService(repo)
+	handler := handlers.NewTodoHandler(service)
+
+	req := httptest.NewRequest(http.MethodGet, "/todos?id=999", nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+	}
+}
