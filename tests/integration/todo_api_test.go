@@ -10,6 +10,7 @@ import (
 	"go-todo/tests/utils/database"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -156,5 +157,73 @@ func TestAPI_GetTodoByID_NotFound(t *testing.T) {
 
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+	}
+}
+
+func TestAPI_PostTodo(t *testing.T) {
+
+	db, err := database.CreateDBConnection("../../.env.test")
+	if err != nil {
+		t.Fatalf("failed to connect to DB: %v", err)
+	}
+	t.Cleanup(func() {
+		db.Close()
+	})
+
+	var actualTodo models.Todo
+
+	repo := repositories.NewTodoRepository(db)
+	service := services.NewTodoService(repo)
+	handler := handlers.NewTodoHandler(service)
+
+	body := strings.NewReader(`{"title":"POSTテスト用Todo","description":"POST APIの統合テスト"}`)
+
+	req := httptest.NewRequest(http.MethodPost, "/todos", body)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("Expected status %d, got %d", http.StatusCreated, rec.Code)
+	}
+
+	err = json.NewDecoder(rec.Body).Decode(&actualTodo)
+	if err != nil {
+		t.Fatalf("failed to decode responce: %v", err)
+	}
+	if actualTodo.ID <= 0 {
+		t.Fatalf("Todo ID == 0, cleanup skipped")
+	}
+
+	t.Cleanup(func() {
+		_, err := db.Exec("DELETE FROM todos WHERE id = ?", actualTodo.ID)
+		if err != nil {
+			t.Errorf("failed to clean up test todo: %v", err)
+		}
+	})
+
+	if actualTodo.Title != "POSTテスト用Todo" {
+		t.Errorf("expected title %s, got %s", "POSTテスト用Todo", actualTodo.Title)
+	}
+
+	if actualTodo.Description != "POST APIの統合テスト" {
+		t.Errorf("expected description %s, got %s", "POST APIの統合テスト", actualTodo.Description)
+	}
+
+	dbTodo, err := repo.GetTodoByID(actualTodo.ID)
+
+	if err != nil {
+		t.Fatalf("failed to get todo from DB: %v", err)
+	}
+	if dbTodo.ID != actualTodo.ID {
+		t.Errorf("expected ID %d, got %d", actualTodo.ID, dbTodo.ID)
+	}
+
+	if dbTodo.Title != actualTodo.Title {
+		t.Errorf("expected Title %s, got %s", actualTodo.Title, dbTodo.Title)
+	}
+
+	if dbTodo.Description != actualTodo.Description {
+		t.Errorf("expected Description %s, got %s", actualTodo.Description, dbTodo.Description)
 	}
 }
