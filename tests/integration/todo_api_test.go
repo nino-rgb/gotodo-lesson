@@ -227,3 +227,59 @@ func TestAPI_PostTodo(t *testing.T) {
 		t.Errorf("expected Description %s, got %s", actualTodo.Description, dbTodo.Description)
 	}
 }
+
+func TestAPI_PutTodo(t *testing.T) {
+
+	db, err := database.CreateDBConnection("../../.env.test")
+	if err != nil {
+		t.Fatalf("failed to connect to DB: %v", err)
+	}
+	t.Cleanup(func() {
+		db.Close()
+	})
+
+	repo := repositories.NewTodoRepository(db)
+	service := services.NewTodoService(repo)
+	handler := handlers.NewTodoHandler(service)
+
+	todo := &models.Todo{
+		Title:       "更新前のタイトル",
+		Description: "更新前の詳細",
+	}
+
+	err = repo.CreateTodo(todo)
+	if err != nil {
+		t.Fatalf("failed to create todo: %v", err)
+	}
+
+	t.Cleanup(func() {
+		_, err := db.Exec("DELETE FROM todos WHERE id = ?", todo.ID)
+		if err != nil {
+			t.Errorf("failed to clean up test todo: %v", err)
+		}
+	})
+
+	body := strings.NewReader(`{"title":"PUTテスト用Todo","description":"PUT APIの統合テスト"}`)
+
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/todos?id=%d", todo.ID), body)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("expected status %d, got %d", http.StatusNoContent, rec.Code)
+	}
+
+	dbTodo, err := repo.GetTodoByID(todo.ID)
+	if err != nil {
+		t.Fatalf("failed to get todo from DB: %v", err)
+	}
+
+	if dbTodo.Title != "PUTテスト用Todo" {
+		t.Errorf("expected title %s, got %s", "PUTテスト用Todo", dbTodo.Title)
+	}
+
+	if dbTodo.Description != "PUT APIの統合テスト" {
+		t.Errorf("expected description %s, got %s", "PUT APIの統合テスト", dbTodo.Description)
+	}
+}
