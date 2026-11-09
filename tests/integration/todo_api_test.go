@@ -2,6 +2,7 @@ package integration
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go-todo/handlers"
 	"go-todo/models"
@@ -281,5 +282,51 @@ func TestAPI_PutTodo(t *testing.T) {
 
 	if dbTodo.Description != "PUT APIの統合テスト" {
 		t.Errorf("expected description %s, got %s", "PUT APIの統合テスト", dbTodo.Description)
+	}
+}
+
+func TestAPI_DeleteTodo(t *testing.T) {
+	db, err := database.CreateDBConnection("../../.env.test")
+	if err != nil {
+		t.Fatalf("failed to connect to DB: %v", err)
+	}
+	t.Cleanup(func() {
+		db.Close()
+	})
+
+	repo := repositories.NewTodoRepository(db)
+	service := services.NewTodoService(repo)
+	handler := handlers.NewTodoHandler(service)
+
+	todo := &models.Todo{
+		Title:       "DELETEAPIテストタイトル",
+		Description: "DELETEAPIテスト詳細",
+	}
+
+	err = repo.CreateTodo(todo)
+	if err != nil {
+		t.Fatalf("failed to create todo: %v", err)
+	}
+
+	t.Cleanup(func() {
+		_, err := db.Exec("DELETE FROM todos WHERE id = ?", todo.ID)
+		if err != nil {
+			t.Errorf("failed to clean up test todo: %v", err)
+		}
+	})
+
+	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/todos?id=%d", todo.ID), nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("expected status %d, got %d", http.StatusNoContent, rec.Code)
+	}
+
+	_, err = repo.GetTodoByID(todo.ID)
+
+	if !errors.Is(err, models.ErrNotFound) {
+		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
